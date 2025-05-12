@@ -1,2 +1,5 @@
 backend/venv
 frontend/venv
+backend/test/__pycache__
+backend/db/__pycache__
+backend/__pycache__/
