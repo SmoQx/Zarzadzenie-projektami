@@ -1,5 +1,5 @@
 from flask import Flask
-from db.db_controler import init_db
+from db.db_execute import init_db
 
 
 app = Flask(__name__)
@@ -21,4 +21,5 @@ def add_two(num: int) -> int:
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)

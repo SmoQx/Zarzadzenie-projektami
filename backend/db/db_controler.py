@@ -45,3 +45,24 @@ class PostgresConnector:
         if self.connection:
             self.connection.close()
             print("Connection closed")
+
+    def __enter__(self):
+        try:
+            self.connection = psycopg2.connect(**self.config)
+            self.cursor = self.connection.cursor()
+            print("Connected to PostgreSQL")
+        except OperationalError as e:
+            print(f"Connection error: {e}")
+            raise
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.cursor:
+            self.cursor.close()
+        if self.connection:
+            if exc_type:
+                self.connection.rollback()
+            else:
+                self.connection.commit()
+            self.connection.close()
+            print("Connection closed")
