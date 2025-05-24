@@ -1,6 +1,6 @@
 class ApiClient {
     constructor() {
-        this.baseUrl = '/api'; // Wykorzystujemy proxy z nginx
+        this.baseUrl = 'http://127.0.0.1:5000'; // Bezpośrednio do backendu
     }
 
     async get(endpoint) {
@@ -80,6 +80,18 @@ async function loadPageData() {
         const response = await api.get('/');
         console.log('Backend connection established:', response);
         
+        // Wyświetlamy dane z backendu w #api-data
+        const apiDataElement = document.getElementById('api-data');
+        if (apiDataElement) {
+            apiDataElement.innerHTML = `
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; border: 1px solid #27ae60;">
+                    <h3>✅ Połączenie z backendem działa!</h3>
+                    <p><strong>Wiadomość z serwera:</strong> ${response.message}</p>
+                    <p><small>Port: 5000 | Status: Połączony</small></p>
+                </div>
+            `;
+        }
+        
         // Wyświetlamy informację o połączeniu w UI
         showConnectionStatus(true, response.message);
         
@@ -89,6 +101,19 @@ async function loadPageData() {
         
     } catch (error) {
         console.error('Failed to connect to backend:', error);
+        
+        // Wyświetlamy błąd w #api-data
+        const apiDataElement = document.getElementById('api-data');
+        if (apiDataElement) {
+            apiDataElement.innerHTML = `
+                <div style="background: #ffe8e8; padding: 15px; border-radius: 5px; border: 1px solid #e74c3c;">
+                    <h3>❌ Błąd połączenia z backendem</h3>
+                    <p><strong>Błąd:</strong> ${error.message}</p>
+                    <p><small>Sprawdź czy backend działa na porcie 5000</small></p>
+                </div>
+            `;
+        }
+        
         showConnectionStatus(false, error.message);
     }
 }
