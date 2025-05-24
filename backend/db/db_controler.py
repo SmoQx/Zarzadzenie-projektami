@@ -1,5 +1,4 @@
 import psycopg2
-from psycopg2 import sql, OperationalError
 
 
 class PostgresConnector:
@@ -27,9 +26,11 @@ class PostgresConnector:
             self.cursor.execute(query, params)
             self.connection.commit()
             print("Query executed successfully")
+            return "Correct"
         except Exception as e:
             print(f"Error executing query: {e}")
             self.connection.rollback()
+            return f"Error {e}"
 
     def fetch_query(self, query, params=None):
         try:
