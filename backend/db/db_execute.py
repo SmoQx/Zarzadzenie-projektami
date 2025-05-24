@@ -1,4 +1,5 @@
 from db.db_controler import PostgresConnector
+from insert_data_into_table import insert_photos_to_db
 
 
 def database_connection(func):
@@ -65,6 +66,7 @@ def init_db():
         db.execute_query("""
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    password VARCHAR(100),
     name VARCHAR(100),
     email TEXT UNIQUE,
     age INTEGER,
@@ -128,6 +130,7 @@ CREATE TABLE reserved(
     atrakcje_id SERIAL REFERENCES powrot(id),
     loty_id SERIAL REFERENCES powrot(id)
     );""")
+        insert_photos_to_db()
 
 if __name__ == "__main__":
     print("asdf")
