@@ -146,12 +146,26 @@ async function loadDataForPage(pageName) {
         case 'powrot':
             await loadReturnData();
             break;
+        case 'login':
+            await loadLoginData();
+            break;
+        case 'register':
+            await loadRegisterData();
+            break;
         default:
             console.log('No specific data loading for page:', pageName);
     }
 }
 
 // Funkcje ładowania danych dla poszczególnych stron
+async function loadLoginData(){
+    console.log("Login page");
+}
+
+async function loadRegisterData(){
+    console.log("Register page");
+}
+
 async function loadHomepageData() {
     console.log('Loading homepage data...');
     // Można dodać wywołania API specyficzne dla strony głównej
