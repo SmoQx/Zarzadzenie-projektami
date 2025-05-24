@@ -5,7 +5,7 @@
   "dependencies": {},
   "scripts": {
     "build": "mkdir -p build && cp *.html *.css *.js build/",
-    "start": "python3 -m http.server 3000"
+    "start": "python3 -m http.server 80"
   },
   "devDependencies": {}
 }
