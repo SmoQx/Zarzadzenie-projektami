@@ -42,7 +42,64 @@ CREATE TABLE users (
     age INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );""")
-
+        db.execute_query("""
+CREATE TABLE rezerwacje(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(1000),
+    photo BYTEA,
+    available BOOLEAN,
+    spaces INTEGER,
+    spaces_left INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);""")
+        db.execute_query("""
+CREATE TABLE loty(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(1000),
+    photo BYTEA,
+    available BOOLEAN,
+    spaces INTEGER,
+    spaces_left INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);""")
+        db.execute_query("""
+CREATE TABLE atrakcje(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(1000),
+    photo BYTEA,
+    available BOOLEAN,
+    spaces INTEGER,
+    spaces_left INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);""")
+        db.execute_query("""
+CREATE TABLE pobyt(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(1000),
+    photo BYTEA,
+    available BOOLEAN,
+    spaces INTEGER,
+    spaces_left INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);""")
+        db.execute_query("""
+CREATE TABLE powrot(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(1000),
+    photo BYTEA,
+    available BOOLEAN,
+    spaces INTEGER,
+    spaces_left INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);""")
+        db.execute_query("""
+CREATE TABLE reserved(
+    id SERIAL PRIMARY KEY,
+    user_id SERIAL REFERENCES users(id),
+    pobyt_id SERIAL REFERENCES powrot(id),
+    atrakcje_id SERIAL REFERENCES powrot(id),
+    loty_id SERIAL REFERENCES powrot(id)
+    );""")
 
 if __name__ == "__main__":
     print("asdf")

@@ -13,8 +13,7 @@ def main():
 
 @app.route("/initdb")
 def init_db_route():
-    db_execute.init_db()
-    return {"message": "baza_tes"}
+    return {"message": f"{db_execute.init_db()}"}
 
 
 @app.route("/create_user_table")
