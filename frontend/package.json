@@ -1,0 +1,11 @@
+{
+  "name": "travel-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "scripts": {
+    "build": "mkdir -p build && cp *.html *.css build/",
+    "start": "python3 -m http.server 3000"
+  },
+  "devDependencies": {}
+}
