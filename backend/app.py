@@ -1,6 +1,7 @@
 from flask import Flask, request
 from db import db_controler, db_execute
 from flask_cors import CORS
+from insert_data_into_table import insert_photos_to_db
 
 
 app = Flask(__name__)
@@ -39,29 +40,39 @@ def add_user():
         return {"message": "no user and email"} 
 
 
+@app.route("/insert_photos")
+def insert_photos():
+    return {"message": insert_photos_to_db()}
+
+
 @app.route("/rezerwacja")
 def reservation():
-    return {"message": "reservation"}
+    data = db_execute.select_data_if_available(table_name="rezerwacje")
+    return {"message": f"{data}"}
 
 
 @app.route("/loty")
 def flight():
-    return {"message": "flight"}
+    data = db_execute.select_data_if_available(table_name="loty")
+    return {"message": f"{data}"}
 
 
 @app.route("/atrakcje")
 def atractions():
-    return {"message": "atractions"}
+    data = db_execute.select_data_if_available(table_name="atrakcje")
+    return {"message": f"{data}"}
 
 
 @app.route("/pobyt")
 def stay():
-    return {"message": "stay"}
+    data = db_execute.select_data_if_available(table_name="pobyt")
+    return {"message": f"{data}"}
 
 
 @app.route("/powrot")
 def trip_return():
-    return {"message": "trip_return"}
+    data = db_execute.select_data_if_available(table_name="powrot")
+    return {"message": f"{data}"}
 
 
 def add_two(num: int) -> int:

@@ -163,7 +163,7 @@ async function loadReservationData() {
 
 async function loadFlightData() {
     console.log('Loading flight data...');
-    const response = await api.get('/loty/');
+    const response = await api.get('/loty');
     console.log('Loty enpoint reponse:', response);
 }
 

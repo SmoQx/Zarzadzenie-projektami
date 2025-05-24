@@ -34,6 +34,27 @@ def insert_data(table_name: str, name: str, spaces: int, photo, db):
                             """, (name, photo, spaces))
 
 
+@database_connection
+def select_data_if_available(table_name: str, db):
+    return db.fetch_query(f"SELECT * FROM {table_name} where available = true;")
+
+
+@database_connection
+def reserve(table_name: str, id: str, user_id: int, db):
+    if table_name == "pobyt":
+        return db.execute_query(f"""
+        insert into reserved(user_id, pobyt_id) values(%s, %s)
+                                ;""", (user_id, id))
+    elif table_name == "loty":
+        return db.execute_query(f"""
+        insert into reserved(user_id, loty_id) values(%s, %s)
+                                ;""", (user_id, id))
+    elif table_name == "atrakcje":
+        return db.execute_query(f"""
+        insert into reserved(user_id, atrakcje_id) values(%s, %s)
+                                ;""", (user_id, id))
+
+
 def init_db():
     with PostgresConnector(
         dbname='mydatabase',  
