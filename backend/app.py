@@ -1,11 +1,14 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from db import db_controler, db_execute
 from flask_cors import CORS
 from insert_data_into_table import insert_photos_to_db
+import re
 
 
 app = Flask(__name__)
 CORS(app)
+
+EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 @app.route("/")
 def main():
@@ -40,14 +43,39 @@ def add_user():
         return {"message": "no user and email"} 
 
 
-@app.route("/register")
+@app.route("/register", methods=["POST"])
 def register():
-    return {"message": "registered"}
+    data = request.get_json(force=True)
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").lower().strip()
+    password = data.get("password") or ""
+
+    errors = {}
+    if not username:
+        errors["username"] = "Pole wymagane"
+    if not EMAIL.match(email):
+        errors["email"] = "Niepoprawny e-mail"
+    if len(password) < 8:
+        errors["password"] = "Hasło ≥ 8 znaków"
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    if db_execute.get_user_email(email):
+        return jsonify({"errors": {"email": "Adres już istnieje"}}), 409
+
+    user_id = db_execute.insert_user(username, email, password_plain=password)
+    return jsonify({"message": "Konto utworzone", "user_id": user_id}), 201
 
 
-@app.route("/login")
+@app.route("/login",  methods=["POST"])
 def login():
-    return {"message": "logged in"}
+    data = request.get_json(force=True)
+    email = (data.get("email") or "").lower().strip()
+    password = data.get("password") or ""
+
+    if db_execute.check_user_cred(email, password):
+        return jsonify({"message": "Zalogowano"}), 200
+    return jsonify({"errors": {"credentials": "Niepoprawny login lub hasło"}}), 401
 
 
 @app.route("/insert_photos")

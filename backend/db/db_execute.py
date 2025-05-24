@@ -41,6 +41,30 @@ def select_data_if_available(table_name: str, db):
 
 
 @database_connection
+def get_user_email(email: str, db):
+    res = db.fetch_query("SELECT * FROM users WHERE email = %s;", (email,))
+    return res[0] if res else None
+
+
+@database_connection
+def insert_user(user_name:str, user_email: str, db, *, password: str) -> int:
+    result = db.execute_query(
+        """
+        INSERT INTO users (name, email, password)
+        VALUES (%s, %s, %s)
+        RETURNING id;
+        """,
+        (user_name,user_email, password)
+    )
+    return result[0]["id"]
+
+@database_connection
+def check_user_cred(email: str, password: str, db) -> bool:
+    user = get_user_email(email, db=db)
+    return bool(user and user["password"] == password)
+
+
+@database_connection
 def reserve(table_name: str, id: str, user_id: int, db):
     if table_name == "pobyt":
         return db.execute_query(f"""
@@ -56,6 +80,7 @@ def reserve(table_name: str, id: str, user_id: int, db):
                                 ;""", (user_id, id))
 
 
+
 def init_db():
     with PostgresConnector(
         dbname='mydatabase',  
@@ -66,7 +91,7 @@ def init_db():
         db.execute_query("""
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    password VARCHAR(100),
+    password VARCHAR(100) NOT NULL,
     name VARCHAR(100),
     email TEXT UNIQUE,
     age INTEGER,
