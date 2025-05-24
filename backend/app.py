@@ -40,6 +40,16 @@ def add_user():
         return {"message": "no user and email"} 
 
 
+@app.route("/register")
+def register():
+    return {"message": "registered"}
+
+
+@app.route("/login")
+def login():
+    return {"message": "logged in"}
+
+
 @app.route("/insert_photos")
 def insert_photos():
     return {"message": insert_photos_to_db()}
