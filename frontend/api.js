@@ -159,12 +159,12 @@ async function loadHomepageData() {
 
 async function loadReservationData() {
     console.log('Loading reservation data...');
-    // Można dodać wywołania API dla rezerwacji
 }
 
 async function loadFlightData() {
     console.log('Loading flight data...');
-    // Można dodać wywołania API dla lotów
+    const response = await api.get('/loty/');
+    console.log('Loty enpoint reponse:', response);
 }
 
 async function loadAttractionsData() {
