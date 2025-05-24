@@ -1,4 +1,4 @@
-import psycopg2
+from psycopg2 import OperationalError, connect
 
 
 class PostgresConnector:
@@ -15,7 +15,7 @@ class PostgresConnector:
 
     def connect(self):
         try:
-            self.connection = psycopg2.connect(**self.config)
+            self.connection = connect(**self.config)
             self.cursor = self.connection.cursor()
             print("Connection to PostgreSQL DB successful")
         except OperationalError as e:
@@ -49,7 +49,7 @@ class PostgresConnector:
 
     def __enter__(self):
         try:
-            self.connection = psycopg2.connect(**self.config)
+            self.connection = connect(**self.config)
             self.cursor = self.connection.cursor()
             print("Connected to PostgreSQL")
         except OperationalError as e:

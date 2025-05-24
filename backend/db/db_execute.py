@@ -7,14 +7,14 @@ def database_connection(func):
             dbname='mydatabase',  
             user='myuser',        
             password='mypassword', 
-            host='db'
+            host="127.0.0.1" if "auto_test" in kwargs.keys() and kwargs["auto_test"] == True else "db"
         ) as db:
             return func(*args, **kwargs, db=db)
     return wrap
 
 
 @database_connection
-def test_select(db):
+def test_select(db, auto_test = False):
     what_was_returned = db.fetch_query("SELECT * FROM users;")
     print(what_was_returned)
     return what_was_returned
