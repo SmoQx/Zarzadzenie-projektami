@@ -27,6 +27,13 @@ def insert_user(user_name: str, user_email: str, db):
                             """, (user_name, user_email))
 
 
+@database_connection
+def insert_data(table_name: str, name: str, spaces: int, photo, db):
+    return db.execute_query(f"""
+    INSERT INTO {table_name}(name, photo, available, spaces, spaces_left) values(%s, %s, TRUE, %s, 0)
+                            """, (name, photo, spaces))
+
+
 def init_db():
     with PostgresConnector(
         dbname='mydatabase',  
