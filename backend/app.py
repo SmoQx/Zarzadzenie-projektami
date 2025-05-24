@@ -39,6 +39,31 @@ def add_user():
         return {"message": "no user and email"} 
 
 
+@app.route("/rezerwacja")
+def reservation():
+    return {"message": "reservation"}
+
+
+@app.route("/loty")
+def flight():
+    return {"message": "flight"}
+
+
+@app.route("/atrakcje")
+def atractions():
+    return {"message": "atractions"}
+
+
+@app.route("/pobyt")
+def stay():
+    return {"message": "stay"}
+
+
+@app.route("/powrot")
+def trip_return():
+    return {"message": "trip_return"}
+
+
 def add_two(num: int) -> int:
     return num + 2
 
