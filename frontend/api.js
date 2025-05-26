@@ -99,28 +99,6 @@ function parseBackendData(dataString) {
     return [{ rawData: dataString }];
 }
 
-// Specjalna funkcja do parsowania danych lotów
-function parseFlightData(dataString) {
-    const flights = [];
-    
-    // Szukamy tupli w formacie (id, nazwa, memory, status, miejsca, zajęte, data)
-    const tuplePattern = /\((\d+),\s*'([^']+)',\s*<memory[^>]*>,\s*(True|False),\s*(\d+),\s*(\d+),\s*datetime\.datetime\([^)]+\)\)/g;
-    
-    let match;
-    while ((match = tuplePattern.exec(dataString)) !== null) {
-        flights.push({
-            id: parseInt(match[1]),
-            airline: match[2],
-            available: match[3] === 'True',
-            totalSeats: parseInt(match[4]),
-            occupiedSeats: parseInt(match[5]),
-            availableSeats: parseInt(match[4]) - parseInt(match[5])
-        });
-    }
-    
-    return flights;
-}
-
 // Funkcja formatująca dane do wyświetlenia w HTML
 function formatDataForDisplay(data, pageType) {
     if (!data || !data.message) {
@@ -286,159 +264,8 @@ async function loadFlightData() {
         const response = await api.get('/loty');
         console.log('Loty endpoint response:', response);
         
-        if (apiDataElement && response && response.message) {
-            const flights = parseFlightData(response.message);
-            
-            if (flights.length > 0) {
-                let html = `
-                <div class="flight-data-container">
-                    <h3>✈️ Dostępne loty</h3>
-                    <table class="flights-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Linia lotnicza</th>
-                                <th>Status</th>
-                                <th>Miejsca całkowite</th>
-                                <th>Miejsca zajęte</th>
-                                <th>Miejsca dostępne</th>
-                                <th>Akcje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                flights.forEach(flight => {
-                    const statusClass = flight.available ? 'status-available' : 'status-unavailable';
-                    const statusText = flight.available ? 'Dostępny' : 'Niedostępny';
-                    const availabilityClass = flight.availableSeats > 0 ? 'seats-available' : 'seats-full';
-                    
-                    html += `
-                        <tr>
-                            <td>${flight.id}</td>
-                            <td class="airline-name">${flight.airline}</td>
-                            <td><span class="status ${statusClass}">${statusText}</span></td>
-                            <td>${flight.totalSeats}</td>
-                            <td>${flight.occupiedSeats}</td>
-                            <td class="${availabilityClass}">${flight.availableSeats}</td>
-                            <td>
-                                ${flight.available && flight.availableSeats > 0 
-                                    ? '<button class="reserve-btn" onclick="reserveFlight(' + flight.id + ')">Rezerwuj</button>'
-                                    : '<button class="reserve-btn disabled" disabled>Brak miejsc</button>'
-                                }
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                html += `
-                        </tbody>
-                    </table>
-                </div>
-                
-                <style>
-                .flight-data-container {
-                    margin: 20px 0;
-                }
-                
-                .flights-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 15px;
-                    background: white;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                }
-                
-                .flights-table th,
-                .flights-table td {
-                    padding: 12px;
-                    text-align: left;
-                    border-bottom: 1px solid #e0e0e0;
-                }
-                
-                .flights-table th {
-                    background-color: #3498db;
-                    color: white;
-                    font-weight: 600;
-                }
-                
-                .flights-table tr:hover {
-                    background-color: #f8f9fa;
-                }
-                
-                .airline-name {
-                    font-weight: 500;
-                    color: #2c3e50;
-                }
-                
-                .status {
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                }
-                
-                .status-available {
-                    background-color: #d4edda;
-                    color: #155724;
-                    border: 1px solid #c3e6cb;
-                }
-                
-                .status-unavailable {
-                    background-color: #f8d7da;
-                    color: #721c24;
-                    border: 1px solid #f5c6cb;
-                }
-                
-                .seats-available {
-                    color: #27ae60;
-                    font-weight: 600;
-                }
-                
-                .seats-full {
-                    color: #e74c3c;
-                    font-weight: 600;
-                }
-                
-                .reserve-btn {
-                    background-color: #3498db;
-                    color: white;
-                    border: none;
-                    padding: 6px 12px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 12px;
-                    font-weight: 500;
-                    transition: background-color 0.2s;
-                }
-                
-                .reserve-btn:hover:not(.disabled) {
-                    background-color: #2980b9;
-                }
-                
-                .reserve-btn.disabled {
-                    background-color: #bdc3c7;
-                    cursor: not-allowed;
-                }
-                </style>
-                `;
-                
-                apiDataElement.innerHTML = html;
-            } else {
-                apiDataElement.innerHTML = `
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;">
-                        <h3>⚠️ Brak danych lotów</h3>
-                        <p>Nie udało się sparsować danych z endpointu /loty</p>
-                        <details>
-                            <summary>Dane surowe z API:</summary>
-                            <pre style="background: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 4px; overflow-x: auto;">${response.message}</pre>
-                        </details>
-                    </div>
-                `;
-            }
+        if (apiDataElement) {
+            apiDataElement.innerHTML = formatDataForDisplay(response, 'loty');
         }
     } catch (error) {
         console.error('Error loading flight data:', error);
@@ -560,12 +387,6 @@ function showConnectionStatus(isConnected, message) {
     setTimeout(() => {
         statusElement.style.opacity = '0.3';
     }, 5000);
-}
-
-// Funkcja do rezerwacji lotu
-function reserveFlight(flightId) {
-    alert(`Rezerwacja lotu ID: ${flightId}\n\nTa funkcjonalność zostanie wkrótce zaimplementowana!`);
-    // Tutaj można dodać rzeczywistą logikę rezerwacji
 }
 
 // Inicjalizacja przy załadowaniu strony
