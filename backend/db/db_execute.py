@@ -22,13 +22,6 @@ def test_select(db, auto_test = False):
 
 
 @database_connection
-def insert_user(user_name: str, user_email: str, db):
-    return db.execute_query("""
-    INSERT INTO users(name, email) values(%s, %s)
-                            """, (user_name, user_email))
-
-
-@database_connection
 def insert_data(table_name: str, name: str, spaces: int, photo, db):
     return db.execute_query(f"""
     INSERT INTO {table_name}(name, photo, available, spaces, spaces_left) values(%s, %s, TRUE, %s, 0)
@@ -47,7 +40,7 @@ def get_user_email(email: str, db):
 
 
 @database_connection
-def insert_user(user_name:str, user_email: str, db, *, password: str) -> int:
+def insert_user(user_name:str, user_email: str, password: str, db) -> int:
     result = db.execute_query(
         """
         INSERT INTO users (name, email, password)
@@ -56,12 +49,12 @@ def insert_user(user_name:str, user_email: str, db, *, password: str) -> int:
         """,
         (user_name,user_email, password)
     )
-    return result[0]["id"]
+    return result[0]
 
 @database_connection
 def check_user_cred(email: str, password: str, db) -> bool:
-    user = get_user_email(email, db=db)
-    return bool(user and user["password"] == password)
+    user = get_user_email(email)
+    return True if user[1] == password else False
 
 
 @database_connection

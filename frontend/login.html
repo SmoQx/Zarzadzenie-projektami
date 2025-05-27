@@ -15,7 +15,7 @@
     <main>
       <section>
         <h2>Logowanie</h2>
-        <form action="#" method="post" class="login-form">
+        <form id="login-form">
           <label for="username">Nazwa użytkownika</label>
           <input type="text" id="username" name="username" placeholder="Wpisz nazwę użytkownika" required />
 
@@ -39,5 +39,29 @@
   </div>
   
   <script src="api.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        const response = await fetch('http://127.0.0.1:5000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          window.location.href = 'loty.html';
+        } else {
+          alert(result.message || 'logowania');
+        }
+      } catch (error) {
+        console.error('Błąd:', error);
+        alert('Wystąpił błąd sieci');
+      }
+    });
+  </script>
+
 </body>
 </html>

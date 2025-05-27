@@ -58,22 +58,26 @@ def register():
     if len(password) < 8:
         errors["password"] = "Hasło ≥ 8 znaków"
     if errors:
-        return jsonify({"errors": errors}), 400
+        return jsonify({"message": str(errors)}), 400
 
     if db_execute.get_user_email(email):
-        return jsonify({"errors": {"email": "Adres już istnieje"}}), 409
+        app.logger.error("Adres istnieje")
+        return jsonify({"message": str({"email": "Adres już istnieje"})}), 409
 
-    user_id = db_execute.insert_user(username, email, password_plain=password)
+    app.logger.info("przed stworzeniem usera")
+    user_id = db_execute.insert_user(username, email, password)
+    app.logger.info("stworzono usera")
     return jsonify({"message": "Konto utworzone", "user_id": user_id}), 201
 
 
 @app.route("/login",  methods=["POST"])
 def login():
     data = request.get_json(force=True)
-    email = (data.get("email") or "").lower().strip()
+    email = (data.get("username") or "").lower().strip()
     password = data.get("password") or ""
-
-    if db_execute.check_user_cred(email, password):
+    check = db_execute.check_user_cred(email, password)
+    app.logger.info(check)
+    if check:
         return jsonify({"message": "Zalogowano"}), 200
     return jsonify({"errors": {"credentials": "Niepoprawny login lub hasło"}}), 401
 
