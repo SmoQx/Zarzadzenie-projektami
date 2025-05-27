@@ -73,33 +73,164 @@ class ApiClient {
 // Globalna instancja API klienta
 const api = new ApiClient();
 
-// Funkcja do parsowania danych z backendu (które przychodzą jako string z tuple'ami)
+// Ulepszona funkcja do parsowania danych z backendu
 function parseBackendData(dataString) {
+    console.log('Raw data:', dataString);
+    
     // Usuwamy niepotrzebne elementy jak <memory at 0x...>
-    let cleanData = dataString.replace(/<memory at 0x[^>]+>/g, '[BINARY_DATA]');
+    let cleanData = dataString.replace(/<memory at 0x[^>]+>/g, 'null');
     
-    // Parsujemy datetime obiekty
-    cleanData = cleanData.replace(/datetime\.datetime\([^)]+\)/g, '[DATETIME]');
-    
-    // Próbujemy wyciągnąć informacje z tupli
-    const tupleMatches = cleanData.match(/\(([^)]+)\)/g);
-    
-    if (tupleMatches) {
-        return tupleMatches.map((tuple, index) => {
-            // Usuwamy nawiasy i dzielimy na elementy
-            const elements = tuple.slice(1, -1).split(', ');
-            return {
-                id: index + 1,
-                rawData: elements,
-                formattedData: elements.map(el => el.replace(/'/g, ''))
-            };
+    // Parsujemy datetime obiekty - wyciągamy datę i czas
+    cleanData = cleanData.replace(/datetime\.datetime\((\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/g, 
+        (match, year, month, day, hour, minute, second, microsecond) => {
+            const date = new Date(year, month - 1, day, hour, minute, second, Math.floor(microsecond / 1000));
+            return `"${date.toISOString()}"`;
         });
+    
+    // Zamieniamy True/False na boolean
+    cleanData = cleanData.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
+    
+    // Zamieniamy None na null
+    cleanData = cleanData.replace(/\bNone\b/g, 'null');
+    
+    // Próbujemy wyciągnąć informacje z tupli używając regex
+    const tuplePattern = /\(([^()]*(?:\([^()]*\)[^()]*)*)\)/g;
+    const tuples = [];
+    let match;
+    
+    while ((match = tuplePattern.exec(cleanData)) !== null) {
+        const tupleContent = match[1];
+        
+        // Dzielimy tuple na elementy, uwzględniając stringi w cudzysłowach
+        const elements = [];
+        let current = '';
+        let inQuotes = false;
+        let depth = 0;
+        
+        for (let i = 0; i < tupleContent.length; i++) {
+            const char = tupleContent[i];
+            
+            if (char === "'" && tupleContent[i-1] !== '\\') {
+                inQuotes = !inQuotes;
+                current += char;
+            } else if (char === '(' && !inQuotes) {
+                depth++;
+                current += char;
+            } else if (char === ')' && !inQuotes) {
+                depth--;
+                current += char;
+            } else if (char === ',' && !inQuotes && depth === 0) {
+                elements.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        if (current.trim()) {
+            elements.push(current.trim());
+        }
+        
+        tuples.push(elements);
     }
     
-    return [{ rawData: dataString }];
+    return tuples.map((tuple, index) => ({
+        id: index + 1,
+        rawElements: tuple,
+        parsedElements: tuple.map(parseElement)
+    }));
 }
 
-// Funkcja formatująca dane do wyświetlenia w HTML
+// Funkcja pomocnicza do parsowania pojedynczego elementu
+function parseElement(element) {
+    // Usuwamy białe znaki
+    element = element.trim();
+    
+    // String w cudzysłowach
+    if (element.startsWith("'") && element.endsWith("'")) {
+        return {
+            type: 'string',
+            value: element.slice(1, -1)
+        };
+    }
+    
+    // String w cudzysłowach podwójnych (datetime)
+    if (element.startsWith('"') && element.endsWith('"')) {
+        return {
+            type: 'datetime',
+            value: element.slice(1, -1),
+            formatted: new Date(element.slice(1, -1)).toLocaleString('pl-PL')
+        };
+    }
+    
+    // Number
+    if (/^\d+$/.test(element)) {
+        return {
+            type: 'number',
+            value: parseInt(element)
+        };
+    }
+    
+    // Float
+    if (/^\d+\.\d+$/.test(element)) {
+        return {
+            type: 'float',
+            value: parseFloat(element)
+        };
+    }
+    
+    // Boolean
+    if (element === 'true' || element === 'false') {
+        return {
+            type: 'boolean',
+            value: element === 'true'
+        };
+    }
+    
+    // Null
+    if (element === 'null') {
+        return {
+            type: 'null',
+            value: null
+        };
+    }
+    
+    // Default - nieznany typ
+    return {
+        type: 'unknown',
+        value: element
+    };
+}
+
+// Funkcja zwracająca nazwy kolumn w zależności od typu strony
+function getColumnNames(pageType) {
+    const columnMappings = {
+        'loty': ['ID', 'Nazwa linii lotniczej', 'Dane binarne', 'Status', 'Cena', 'Rabat', 'Data utworzenia'],
+        'rezerwacja': ['ID', 'Użytkownik', 'Lot', 'Data rezerwacji', 'Status', 'Liczba pasażerów', 'Cena całkowita'],
+        'atrakcje': ['ID', 'Nazwa', 'Opis', 'Lokalizacja', 'Cena', 'Ocena', 'Data dodania'],
+        'pobyt': ['ID', 'Hotel', 'Data zameldowania', 'Data wymeldowania', 'Liczba gości', 'Cena za noc', 'Status'],
+        'powrot': ['ID', 'Lot powrotny', 'Data', 'Status', 'Gate', 'Opóźnienie', 'Uwagi']
+    };
+    
+    return columnMappings[pageType] || [];
+}
+
+// Funkcja zwracająca ikonę w zależności od typu pola
+function getFieldIcon(type) {
+    const icons = {
+        'string': '📝',
+        'number': '🔢',
+        'float': '💯',
+        'boolean': '☑️',
+        'datetime': '📅',
+        'null': '⚫',
+        'unknown': '❓'
+    };
+    
+    return icons[type] || '📄';
+}
+
+// Ulepszona funkcja formatująca dane do wyświetlenia w HTML
 function formatDataForDisplay(data, pageType) {
     if (!data || !data.message) {
         return '<p>Brak danych do wyświetlenia</p>';
@@ -107,22 +238,53 @@ function formatDataForDisplay(data, pageType) {
 
     const parsedData = parseBackendData(data.message);
     
+    if (parsedData.length === 0) {
+        return `<div class="data-container">
+            <h3>📊 Dane z endpointu /${pageType}</h3>
+            <p>Brak danych do wyświetlenia lub błąd parsowania</p>
+            <details>
+                <summary>Surowe dane z serwera</summary>
+                <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;">${data.message}</pre>
+            </details>
+        </div>`;
+    }
+
     let html = `<div class="data-container">
-        <h3>📊 Dane z endpointu /${pageType}</h3>`;
+        <h3>📊 Dane z endpointu /${pageType}</h3>
+        <p>Znaleziono <strong>${parsedData.length}</strong> rekordów</p>`;
+
+    // Definiujemy nazwy kolumn w zależności od typu strony
+    const columnNames = getColumnNames(pageType);
 
     parsedData.forEach((item, index) => {
         html += `
         <div class="data-item" style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #3498db;">
-            <h4>Element ${index + 1}</h4>
+            <h4>📋 Rekord ${index + 1}</h4>
             <div class="data-details">`;
         
-        if (item.formattedData && Array.isArray(item.formattedData)) {
-            item.formattedData.forEach((element, i) => {
-                html += `<p><strong>Pole ${i + 1}:</strong> ${element}</p>`;
-            });
-        } else {
-            html += `<p><strong>Dane:</strong> ${JSON.stringify(item.rawData)}</p>`;
-        }
+        item.parsedElements.forEach((element, i) => {
+            const columnName = columnNames[i] || `Pole ${i + 1}`;
+            const icon = getFieldIcon(element.type);
+            
+            html += `<div style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; border: 1px solid #e0e0e0;">
+                <strong>${icon} ${columnName}:</strong> 
+                <span style="color: #666; font-size: 0.9em;">[${element.type}]</span>
+                <div style="margin-top: 4px;">`;
+            
+            if (element.type === 'datetime') {
+                html += `<span style="color: #2c3e50;">${element.formatted}</span>`;
+            } else if (element.type === 'boolean') {
+                html += `<span style="color: ${element.value ? '#27ae60' : '#e74c3c'};">${element.value ? '✅ Tak' : '❌ Nie'}</span>`;
+            } else if (element.type === 'null') {
+                html += `<span style="color: #95a5a6; font-style: italic;">Brak danych</span>`;
+            } else if (element.type === 'number') {
+                html += `<span style="color: #2c3e50; font-weight: 500;">${element.value}</span>`;
+            } else {
+                html += `<span style="color: #2c3e50;">${element.value}</span>`;
+            }
+            
+            html += `</div></div>`;
+        });
         
         html += `</div></div>`;
     });
@@ -327,67 +489,3 @@ async function loadStayData() {
         }
     }
 }
-
-async function loadReturnData() {
-    console.log('Loading return data...');
-    const apiDataElement = document.getElementById('api-data');
-    
-    try {
-        const response = await api.get('/powrot');
-        console.log('Powrot endpoint response:', response);
-        
-        if (apiDataElement) {
-            apiDataElement.innerHTML = formatDataForDisplay(response, 'powrot');
-        }
-    } catch (error) {
-        console.error('Error loading return data:', error);
-        if (apiDataElement) {
-            apiDataElement.innerHTML = `
-                <div style="background: #ffe8e8; padding: 15px; border-radius: 5px; border: 1px solid #e74c3c;">
-                    <h3>❌ Błąd ładowania danych powrotu</h3>
-                    <p><strong>Błąd:</strong> ${error.message}</p>
-                </div>
-            `;
-        }
-    }
-}
-
-// Wyświetla status połączenia z backendem
-function showConnectionStatus(isConnected, message) {
-    // Sprawdzamy czy już istnieje element statusu
-    let statusElement = document.getElementById('connection-status');
-    
-    if (!statusElement) {
-        // Tworzymy element statusu
-        statusElement = document.createElement('div');
-        statusElement.id = 'connection-status';
-        statusElement.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            color: white;
-            font-size: 12px;
-            z-index: 1000;
-            max-width: 300px;
-        `;
-        document.body.appendChild(statusElement);
-    }
-    
-    if (isConnected) {
-        statusElement.style.backgroundColor = '#27ae60';
-        statusElement.innerHTML = `✅ Połączono z backendem<br><small>${message}</small>`;
-    } else {
-        statusElement.style.backgroundColor = '#e74c3c';
-        statusElement.innerHTML = `❌ Błąd połączenia<br><small>${message}</small>`;
-    }
-    
-    // Ukrywamy status po 5 sekundach
-    setTimeout(() => {
-        statusElement.style.opacity = '0.3';
-    }, 5000);
-}
-
-// Inicjalizacja przy załadowaniu strony
-document.addEventListener('DOMContentLoaded', loadPageData);
