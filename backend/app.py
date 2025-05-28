@@ -82,6 +82,23 @@ def login():
     return jsonify({"errors": {"credentials": "Niepoprawny login lub hasło"}}), 401
 
 
+@app.route("/reserve_item")
+def reserve_item():
+    data = request.get_json()
+    username = data.get("username")
+    user_id = data.get("id")
+    item_type = data.get("item_type")
+    item_id = data.get("item_id")
+    data_list = [username, user_id, item_id, item_type]
+    data_name_list = ["username", "user_id", "item_id", "item_type"]
+    if any(data_list):
+        return jsonify({"error": f"data is mising {[item_name for item, item_name in zip(data_list, data_name_list) if item is None]}"}), 400
+
+    #funkcja do bazy kiedy wybiera przedmiot z bazy inkrementuj zajete na przedmiocie z danego typu o podanym id
+
+    return jsonify({"message": "returning element"}), 200
+
+
 @app.route("/insert_photos")
 def insert_photos():
     return {"message": insert_photos_to_db()}
