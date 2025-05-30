@@ -34,7 +34,7 @@ def select_data_if_available(table_name: str, db):
 
 
 @database_connection
-def get_user_email(email: str, db):
+def get_user_email(email: str, db) -> tuple[str] | None:
     res = db.fetch_query("SELECT * FROM users WHERE email = %s;", (email,))
     return res[0] if res else None
 
@@ -52,9 +52,9 @@ def insert_user(user_name:str, user_email: str, password: str, db) -> int:
     return result[0]
 
 @database_connection
-def check_user_cred(email: str, password: str, db) -> bool:
+def check_user_cred_and_return_id(email: str, password: str, db) -> list[int | str] | None:
     user = get_user_email(email)
-    return True if user[1] == password else False
+    return [user[0], str(user[3])] if user else None
 
 
 @database_connection

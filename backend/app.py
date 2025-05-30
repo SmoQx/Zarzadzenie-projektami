@@ -75,10 +75,10 @@ def login():
     data = request.get_json(force=True)
     email = (data.get("username") or "").lower().strip()
     password = data.get("password") or ""
-    check = db_execute.check_user_cred(email, password)
+    check = db_execute.check_user_cred_and_return_id(email, password)
     app.logger.info(check)
     if check:
-        return jsonify({"message": "Zalogowano"}), 200
+        return jsonify({"message": check}), 200
     return jsonify({"errors": {"credentials": "Niepoprawny login lub hasło"}}), 401
 
 
