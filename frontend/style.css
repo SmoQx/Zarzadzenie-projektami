@@ -70,3 +70,79 @@ footer {
 nav ul li a.active {
   background-color: #1abc9c;
 }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logout-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Nagłówek: menu i przycisk Wyloguj w jednym rzędzie */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header nav {
+  flex: 1;             
+}
+
+header nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;     
+  flex-shrink: 1;      
+  overflow-x: auto;   
+}
+
+header nav ul li a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: #2c3e50;
+  white-space: nowrap;
+}
+
+header nav ul li a.active {
+  background-color: #1abc9c;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.logout-btn {
+  flex: 0 0 auto;      /* przycisk zachowa stałą szerokość */
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
