@@ -20,12 +20,6 @@ def init_db_route():
     return {"message": f"{db_execute.init_db()}"}
 
 
-@app.route("/create_user_table")
-def create_user_table():
-    db_execute.create_user_table()
-    return {"message": "created_user_table"}
-
-
 @app.route("/test_query")
 def test_query():
     resp = db_execute.test_select()
@@ -82,21 +76,38 @@ def login():
     return jsonify({"errors": {"credentials": "Niepoprawny login lub hasło"}}), 401
 
 
-@app.route("/reserve_item")
+@app.route("/reserve_item", methods=["POST"])
 def reserve_item():
     data = request.get_json()
-    username = data.get("username")
+    email = data.get("email")
     user_id = data.get("id")
     item_type = data.get("item_type")
     item_id = data.get("item_id")
-    data_list = [username, user_id, item_id, item_type]
+    data_list = [email, user_id, item_id, item_type]
     data_name_list = ["username", "user_id", "item_id", "item_type"]
-    if any(data_list):
+    check = db_execute.get_user_email(email)
+    if not check:
+        return jsonify({"error": "there was an error"})
+    if None in data_list:
         return jsonify({"error": f"data is mising {[item_name for item, item_name in zip(data_list, data_name_list) if item is None]}"}), 400
 
-    #funkcja do bazy kiedy wybiera przedmiot z bazy inkrementuj zajete na przedmiocie z danego typu o podanym id
+    if (slots := db_execute.increment_slots(table_name=item_type, id=item_id)) == "success":
+        db_execute.reserve(table_name=item_type, id=item_id, user_id=user_id)
+        return jsonify({"message": "reserved item"}), 200
 
-    return jsonify({"message": "returning element"}), 200
+    return jsonify({"message": f"item not reserved , {slots}"}), 400
+
+
+
+@app.route("/check_if_user_auth")
+def check_if_user_auth():
+    data = request.get_json(force=True)
+    email = (data.get("email") or "").lower().strip()
+    check = db_execute.get_user_email(email)
+    app.logger.info(check)
+    if check:
+        return jsonify({"message": "user_authorized"}), 200
+    return jsonify({"errors": "user un authorized"}), 401
 
 
 @app.route("/insert_photos")
@@ -106,7 +117,10 @@ def insert_photos():
 
 @app.route("/rezerwacja")
 def reservation():
-    data = db_execute.select_data_if_available(table_name="rezerwacje")
+    data = request.get_json()
+    email = data.get("email")
+    user_id = data.get("id")
+    data = db_execute.reservations_for_users(user_id=user_id, email=email)
     return {"message": f"{data}"}
 
 
