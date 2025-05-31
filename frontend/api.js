@@ -85,13 +85,8 @@ const COLUMN_DEFINITIONS = {
         { key: 'created', name: 'Data utworzenia'}
     ],
     'rezerwacja': [
-        { key: 'id', name: 'ID' },
-        { key: 'user', name: 'Użytkownik' },
-        { key: 'flight', name: 'Lot' },
-        { key: 'reservation_date', name: 'Data rezerwacji' },
-        { key: 'status', name: 'Status'},
-        { key: 'passengers', name: 'Liczba pasażerów' },
-        { key: 'total_price', name: 'Cena całkowita' }
+        { key: 'name', name: 'Nazwa' },
+        { key: 'photo', name: 'Zdjecie' },
     ],
     'atrakcje': [
         { key: 'id', name: 'ID' },

@@ -86,6 +86,8 @@ def increment_slots(table_name: str, id: int, db):
     if spaces_left < spaces_max:
         db.execute_query(f"update {table_name} set spaces_left = spaces_left + 1 WHERE id = (%s);", (id,))
         return "success"
+    else:
+        db.execute_query(f"update {table_name} set available = False where id = (%s);", (id, ))
 
     return "no_space"
 

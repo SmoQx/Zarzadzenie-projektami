@@ -121,12 +121,14 @@ def reservation():
     email = data.get("email")
     user_id = data.get("id")
     data = db_execute.reservations_for_users(user_id=user_id, email=email)
+    app.logger.info(data)
     return {"message": f"{data}"}
 
 
 @app.route("/loty")
 def flight():
     data = db_execute.select_data_if_available(table_name="loty")
+    app.logger.info(data)
     return {"message": f"{data}"}
 
 
