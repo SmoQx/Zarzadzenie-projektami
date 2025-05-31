@@ -382,13 +382,33 @@ function getCurrentPageName() {
 }
 
 async function loadDataForPage(pageName) { //
-
     const loaderFunctionName = `load${pageName.charAt(0).toUpperCase() + pageName.slice(1)}Data`;
+    console.log(pageName)
     if (typeof window[loaderFunctionName] === 'function') {
         await window[loaderFunctionName]();
     } else {
-
-        if (COLUMN_DEFINITIONS[pageName]) {
+        if (COLUMN_DEFINITIONS[pageName] && pageName === 'rezerwacja'){
+            console.log(pageName)
+            console.log(`Loading data for generic page: ${pageName}...`);
+            const apiDataElement = document.getElementById('api-data');
+            try {
+                const response = await api.post(`/${pageName}`, {email: "aaaa@aaa", id: 1});
+                console.log(`${pageName} endpoint response:`, response);
+                if (apiDataElement) {
+                    apiDataElement.innerHTML = formatDataForDisplay(response, pageName);
+                }
+            } catch (error) {
+                console.error(`Error loading ${pageName} data:`, error);
+                if (apiDataElement) {
+                    apiDataElement.innerHTML = `
+                        <div style="background: #ffe8e8; padding: 15px; border-radius: 5px; border: 1px solid #e74c3c;">
+                            <h3> Błąd ładowania danych dla ${pageName}</h3>
+                            <p><strong>Błąd:</strong> ${escapeHTML(error.message)}</p>
+                        </div>`;
+                }
+            }
+        } else if (COLUMN_DEFINITIONS[pageName]) {
+            console.log(pageName)
             console.log(`Loading data for generic page: ${pageName}...`);
             const apiDataElement = document.getElementById('api-data');
             try {

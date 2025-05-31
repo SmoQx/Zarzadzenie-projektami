@@ -115,14 +115,14 @@ def insert_photos():
     return {"message": insert_photos_to_db()}
 
 
-@app.route("/rezerwacja")
+@app.route("/rezerwacja", methods=["POST", "GET"])
 def reservation():
     data = request.get_json()
     email = data.get("email")
     user_id = data.get("id")
     data = db_execute.reservations_for_users(user_id=user_id, email=email)
     app.logger.info(data)
-    return {"message": f"{data}"}
+    return jsonify({"message": f"{data}"}), 200
 
 
 @app.route("/loty")
