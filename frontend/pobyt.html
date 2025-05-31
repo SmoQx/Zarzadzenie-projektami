@@ -14,7 +14,7 @@
         <ul>
           <li><a href="index.html">Start</a></li>
           <li><a href="rezerwacja.html" >Rezerwacja</a></li>
-          <li><a href="loty.html" >Loty</a></li>
+          <li><a href="loty.html">Loty</a></li>
           <li><a href="atrakcje.html">Atrakcje</a></li>
           <li><a href="pobyt.html" class="active">Pobyt</a></li>
           <li><a href="powrot.html">Powrót</a></li>
@@ -30,7 +30,7 @@
         <h2>Pobyt</h2>
         <p>Śledź swój pobyt i sprawdzaj szczegóły.</p>
         <div id="api-data">
-
+          <!-- Tutaj api.js wstawi tabelę z ofertami pobytów -->
         </div>
       </section>
     </main>
@@ -41,5 +41,68 @@
   </div>
   
   <script src="api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiData = document.getElementById('api-data');
+
+      const observer = new MutationObserver((mutations) => {
+        const table = apiData.querySelector('table.data-table');
+        if (table && !apiData.dataset.reserveAdded) {
+          apiData.dataset.reserveAdded = 'true';
+
+          // Dodajemy nagłówek "Rezerwuj"
+          const theadTr = table.querySelector('thead tr');
+          const th = document.createElement('th');
+          th.textContent = 'Rezerwuj';
+          theadTr.appendChild(th);
+
+          // Dodajemy do każdego wiersza przycisk
+          table.querySelectorAll('tbody tr').forEach(row => {
+            const idCell = row.querySelector('td[data-label="ID"]');
+            const itemId = idCell ? idCell.textContent.trim() : null;
+
+            const td = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.textContent = 'Zarezerwuj';
+            btn.addEventListener('click', async () => {
+              const userEmail = localStorage.getItem('user_email');
+              const userId = parseInt(localStorage.getItem('user_id'), 10);
+              if (!userEmail || !userId) {
+                alert('Musisz się zalogować, aby dokonać rezerwacji.');
+                window.location.href = 'login.html';
+                return;
+              }
+              const payload = {
+                email: userEmail,
+                id: userId,
+                item_type: 'pobyt',
+                item_id: parseInt(itemId, 10)
+              };
+              try {
+                const res = await fetch('http://127.0.0.1:5000/reserve_item', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                  alert('Rezerwacja pobytu przebiegła pomyślnie!');
+                } else {
+                  alert('Błąd rezerwacji: ' + (result.error || result.message));
+                }
+              } catch (err) {
+                console.error('Błąd sieci przy rezerwacji:', err);
+                alert('Wystąpił błąd sieci');
+              }
+            });
+            td.appendChild(btn);
+            row.appendChild(td);
+          });
+        }
+      });
+
+      observer.observe(apiData, { childList: true, subtree: true });
+    });
+  </script>
 </body>
 </html>

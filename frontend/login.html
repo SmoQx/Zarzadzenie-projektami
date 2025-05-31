@@ -16,34 +16,30 @@
       <section>
         <h2>Logowanie</h2>
         <form id="login-form">
-          <label for="username">Nazwa użytkownika</label>
-          <input type="text" id="username" name="username" placeholder="Wpisz adres e-mail" required />
-
+          <label for="username">Nazwa użytkownika (e-mail)</label>
+          <input type="text" id="username" name="username"
+                 placeholder="Wpisz adres e-mail" required />
+          
           <label for="password">Hasło</label>
-          <input type="password" id="password" name="password" placeholder="Wpisz hasło" required />
-
+          <input type="password" id="password" name="password"
+                 placeholder="Wpisz hasło" required />
+          
           <button type="submit">Zaloguj</button>
-
-          <!-- Sekcja z linkiem do rejestracji -->
+          
           <div class="register-prompt">
-            <p>Nie masz konta?</p>
-            <button type="button" onclick="window.location.href='register.html#register-form'">Zarejestruj się</button>
+            <p>Nie masz konta? <a href="register.html#register-form">Zarejestruj się</a></p>
           </div>
         </form>
       </section>
     </main>
-
-    <footer>
-      <p>&copy; Zarządzanie projektami</p>
-    </footer>
   </div>
-  
-  <script src="api.js"></script>
+
   <script>
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value;  // to jest e-mail
       const password = document.getElementById('password').value;
+
       try {
         const response = await fetch('http://127.0.0.1:5000/login', {
           method: 'POST',
@@ -51,17 +47,27 @@
           body: JSON.stringify({ username, password })
         });
         const result = await response.json();
+
         if (response.ok) {
+          // Załóżmy, że result.message to lista [ user_id, password_hash ]
+          const userId = result.message[0];          // np. liczba 7
+          const userEmail = username.toLowerCase().trim();
+
+          // Zapiszemy do localStorage:
+          localStorage.setItem('user_id', userId);       // przechowujemy identyfikator
+          localStorage.setItem('user_email', userEmail); // przechowujemy e-mail
+
+          // Przekieruj do następnej strony, np. loty.html
           window.location.href = 'loty.html';
         } else {
-          alert(result.message || 'logowania');
+          // Jeżeli login nieudany, wyświetl komunikat
+          alert(result.message.credentials || result.message || 'Błąd logowania');
         }
       } catch (error) {
-        console.error('Błąd:', error);
+        console.error('Błąd sieci:', error);
         alert('Wystąpił błąd sieci');
       }
     });
   </script>
-
 </body>
 </html>

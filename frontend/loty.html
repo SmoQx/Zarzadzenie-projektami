@@ -22,7 +22,7 @@
       </nav>
       <button class="logout-btn" onclick="window.location.href='login.html'">
         Wyloguj
-      </button>	  
+      </button>    
     </header>
 
     <main>
@@ -30,6 +30,7 @@
         <h2>Loty</h2>
         <p>Śledź swoje loty i sprawdzaj szczegóły podróży lotniczych.</p>
         <div id="api-data">
+          <!-- Tutaj "api.js" wstrzyknie tabelę z lotami -->
         </div>
       </section>
     </main>
@@ -39,6 +40,85 @@
     </footer>
   </div>
   
+  <!-- Najpierw ładujemy api.js, który wypełni <div id="api-data"> tabelą -->
   <script src="api.js"></script>
+  
+  <!-- Potem wklejamy poniższy skrypt, który "podczepi" kolumnę z przyciskami rezerwacji do tabeli -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiData = document.getElementById('api-data');
+
+      // MutationObserver – obserwuje moment, w którym api.js wstawi <table class="data-table"> do #api-data
+      const observer = new MutationObserver((mutations) => {
+        // Znajdźmy tabelę wewnątrz #api-data
+        const table = apiData.querySelector('table.data-table');
+        if (table && !apiData.dataset.reserveAdded) {
+          // Oznaczamy, że już dodaliśmy przyciski, aby nie robić tego wielokrotnie
+          apiData.dataset.reserveAdded = 'true';
+
+          // 1) Dodajemy nagłówek nowej kolumny "Rezerwuj"
+          const theadTr = table.querySelector('thead tr');
+          const th = document.createElement('th');
+          th.textContent = 'Rezerwuj';
+          theadTr.appendChild(th);
+
+          // 2) Do każdego wiersza w <tbody> dokładamy <td> z buttonem
+          table.querySelectorAll('tbody tr').forEach(row => {
+            // Szukamy komórki, w której widać "ID" (data-label="ID") – to będzie nasze item_id
+            const idCell = row.querySelector('td[data-label="ID"]');
+            const itemId = idCell ? idCell.textContent.trim() : null;
+
+            // Tworzymy nową komórkę <td> i przycisk
+            const td = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.textContent = 'Zarezerwuj';
+            // Możesz ewentualnie nadać mu dodatkową klasę, np. btn.reserve-btn,
+            // jeżeli chcesz dostosować styl, ale nie jest to konieczne – dziedziczy style domyślne.
+            btn.addEventListener('click', async () => {
+              // Pobieramy email i user_id z localStorage (muszą być tam zapisane w login.html)
+              const userEmail = localStorage.getItem('user_email');
+              const userId = parseInt(localStorage.getItem('user_id'), 10);
+
+              // Jeśli cokolwiek brak, przekieruj na logowanie
+              if (!userEmail || !userId) {
+                alert('Musisz się zalogować, aby dokonać rezerwacji.');
+                window.location.href = 'login.html';
+                return;
+              }
+
+              // Przygotowujemy payload do /reserve_item
+              const payload = {
+                email: userEmail,
+                id: userId,
+                item_type: 'loty',
+                item_id: parseInt(itemId, 10)
+              };
+              try {
+                const res = await fetch('http://127.0.0.1:5000/reserve_item', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                  alert('Rezerwacja lotu przebiegła pomyślnie!');
+                } else {
+                  alert('Błąd rezerwacji: ' + (result.error || result.message));
+                }
+              } catch (err) {
+                console.error('Błąd sieci przy rezerwacji:', err);
+                alert('Wystąpił błąd sieci');
+              }
+            });
+            td.appendChild(btn);
+            row.appendChild(td);
+          });
+        }
+      });
+
+      // Obserwujemy #api-data – czekamy na wstawienie jego zawartości
+      observer.observe(apiData, { childList: true, subtree: true });
+    });
+  </script>
 </body>
 </html>
