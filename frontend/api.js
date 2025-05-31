@@ -77,12 +77,12 @@ const api = new ApiClient();
 const COLUMN_DEFINITIONS = {
     'loty': [
         { key: 'id', name: 'ID'},
-        { key: 'airline', name: 'Linia lotnicza' },
-        { key: 'data', name: 'Dane binarne' },
-        { key: 'active', name: 'Aktywny' },
-        { key: 'price', name: 'Cena (PLN)' },
-        { key: 'discount', name: 'Rabat (%)' },
-        { key: 'created', name: 'Data utworzenia'}
+        { key: 'name', name: 'Linia lotnicza' },
+        { key: 'photo', name: 'Dane binarne' },
+        { key: 'available', name: 'Aktywny' },
+        { key: 'spaces', name: 'Miejsca' },
+        { key: 'spaces_left', name: 'Miejsca zajete' },
+        { key: 'created_at', name: 'Data utworzenia'}
     ],
     'rezerwacja': [
         { key: 'name', name: 'Nazwa' },
@@ -91,7 +91,7 @@ const COLUMN_DEFINITIONS = {
     'atrakcje': [
         { key: 'id', name: 'ID' },
         { key: 'name', name: 'Nazwa' },
-        { key: 'description', name: 'Opis' },
+        { key: 'photo', name: 'Zdjecie' },
         { key: 'location', name: 'Lokalizacja'},
         { key: 'price', name: 'Cena' },
         { key: 'rating', name: 'Ocena'},
@@ -300,6 +300,41 @@ function createCardView(records, columns) {
     return html;
 }
 
+function formatValueForDisplay(value) {
+    if (value === null || value === undefined) {
+        return { type: 'null', value: null, display: '—' };
+    }
+    if (typeof value === 'boolean') {
+        return { type: 'boolean', value, display: value ? '✅ Tak' : '❌ Nie' };
+    }
+    if (typeof value === 'number') {
+        const isInt = Number.isInteger(value);
+        return {
+            type: isInt ? 'number' : 'float',
+            value,
+            display: value.toLocaleString('pl-PL', isInt ? {} : {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        };
+    }
+    if (typeof value === 'string') {
+        const parsedDate = new Date(value);
+        if (!isNaN(parsedDate.getTime())) {
+            return {
+                type: 'datetime',
+                value,
+                display: parsedDate.toLocaleString('pl-PL', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                })
+            };
+        }
+        return { type: 'string', value, display: value };
+    }
+    return { type: 'unknown', value, display: String(value) };
+}
+
 function createFormattedHTML(records, columns, pageType) {
     const recordCount = records.length;
     const recordSuffix = recordCount === 1 ? '' : (recordCount % 10 >= 2 && recordCount % 10 <= 4 && (recordCount % 100 < 10 || recordCount % 100 >= 20) ? 'y' : 'ów');
@@ -321,31 +356,35 @@ function createFormattedHTML(records, columns, pageType) {
 
 
 function formatDataForDisplay(data, pageType) {
-    if (!data || typeof data.message !== 'string' || data.message.trim() === '') {
-        console.log(`formatDataForDisplay: Brak danych wejściowych lub pusty 'data.message' dla pageType: ${pageType}`);
+    if (!data || typeof data.message !== 'object' || data.message === null) {
+        console.log(`formatDataForDisplay: Invalid or missing data for pageType: ${pageType}`);
         return createEmptyDataHTML(pageType);
     }
-    if (data.message.trim() === '[]') {
-        console.log(`formatDataForDisplay: Otrzymano pustą listę '[]' dla pageType: ${pageType}`);
-        return createEmptyDataHTML(pageType);
-    }
-    
-    let parsedRecords;
+    let messageData;
     try {
-        parsedRecords = parseBackendData(data.message);
-    } catch (error) {
-        console.error(`formatDataForDisplay: Błąd podczas parsowania danych dla pageType: ${pageType}`, error);
-        console.error('Surowe dane powodujące błąd:', data.message);
-        return createErrorHTML(pageType, data.message, `Błąd wewnętrzny parsera: ${error.message}`);
+        // jeśli `message` jest stringiem, spróbuj sparsować
+        messageData = typeof data.message === 'string' ? JSON.parse(data.message.replace(/'/g, '"')) : data.message;
+    } catch (e) {
+        console.error("Błąd parsowania message:", e);
+        return createErrorHTML(pageType, data.message, "Błąd parsowania danych JSON.");
     }
 
-    if (!parsedRecords || parsedRecords.length === 0) {
-        console.log(`formatDataForDisplay: Nie udało się sparsować rekordów z 'data.message' dla pageType: ${pageType}. Surowe dane: ${data.message}`);
-        return createErrorHTML(pageType, data.message);
+    const records = Array.isArray(messageData) ? messageData : [messageData];
+
+    if (records.length === 0) {
+        console.log(`formatDataForDisplay: Empty records for pageType: ${pageType}`);
+        return createEmptyDataHTML(pageType);
     }
 
-    const columns = COLUMN_DEFINITIONS[pageType] || getDefaultColumns(parsedRecords[0] ? parsedRecords[0].length : 0);
-    return createFormattedHTML(parsedRecords, columns, pageType);
+    const columns = COLUMN_DEFINITIONS[pageType] || getDefaultColumns(Object.keys(records[0] || {}).length);
+    const processedRecords = records.map(record => {
+        return columns.map(col => {
+            const rawValue = record[col.key];
+            return formatValueForDisplay(rawValue);
+        });
+    });
+
+    return createFormattedHTML(processedRecords, columns, pageType);
 }
 
 

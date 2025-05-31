@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, jsonify
 from db import db_controler, db_execute
 from flask_cors import CORS
@@ -67,7 +68,7 @@ def register():
 @app.route("/login",  methods=["POST"])
 def login():
     data = request.get_json(force=True)
-    email = (data.get("email") or "").lower().strip()
+    email = (data.get("username") or "").lower().strip()
     password = data.get("password") or ""
     check = db_execute.check_user_cred_and_return_id(email, password)
     app.logger.info(check)
@@ -121,32 +122,31 @@ def reservation():
     email = data.get("email")
     user_id = data.get("id")
     data = db_execute.reservations_for_users(user_id=user_id, email=email)
-    app.logger.info(data)
-    return jsonify({"message": f"{data}"}), 200
+    return jsonify({"message": data}), 200
 
 
 @app.route("/loty")
 def flight():
     data = db_execute.select_data_if_available(table_name="loty")
-    return {"message": f"{data}"}
+    return jsonify({"message": data}), 200
 
 
 @app.route("/atrakcje")
 def atractions():
     data = db_execute.select_data_if_available(table_name="atrakcje")
-    return {"message": f"{data}"}
+    return jsonify({"message": data}), 200
 
 
 @app.route("/pobyt")
 def stay():
     data = db_execute.select_data_if_available(table_name="pobyt")
-    return {"message": f"{data}"}
+    return jsonify({"message": data}), 200
 
 
 @app.route("/powrot")
 def trip_return():
     data = db_execute.select_data_if_available(table_name="powrot")
-    return {"message": f"{data}"}
+    return jsonify({"message": data}), 200
 
 
 def add_two(num: int) -> int:

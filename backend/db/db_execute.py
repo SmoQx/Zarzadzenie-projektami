@@ -120,6 +120,11 @@ LEFT JOIN pobyt p ON r.pobyt_id = p.id
 LEFT JOIN atrakcje a ON r.atrakcje_id = a.id
 LEFT JOIN loty l ON r.loty_id = l.id
 where r.user_id = {user_id};""")
+
+    for idx, item in enumerate(data):
+        data[idx] = list(item)
+        data[idx][1] = base64.b64encode(bytes(data[idx][1])).decode('utf-8')
+
     columns = ["nazwa", "zdjecia"]
 
     result = [dict(zip(columns, row)) for row in data]
