@@ -78,33 +78,33 @@ const COLUMN_DEFINITIONS = {
     'loty': [
         { key: 'id', name: 'ID'},
         { key: 'name', name: 'Linia lotnicza' },
-        { key: 'photo', name: 'Dane binarne' },
+        { key: 'photo', name: 'Zdjecie' },
         { key: 'available', name: 'Aktywny' },
         { key: 'spaces', name: 'Miejsca' },
         { key: 'spaces_left', name: 'Miejsca zajete' },
         { key: 'created_at', name: 'Data utworzenia'}
     ],
     'rezerwacja': [
-        { key: 'name', name: 'Nazwa' },
-        { key: 'photo', name: 'Zdjecie' },
+        { key: 'nazwa', name: 'Nazwa' },
+        { key: 'zdjecia', name: 'Zdjecie' },
     ],
     'atrakcje': [
-        { key: 'id', name: 'ID' },
-        { key: 'name', name: 'Nazwa' },
+        { key: 'id', name: 'ID'},
+        { key: 'name', name: 'Linia lotnicza' },
         { key: 'photo', name: 'Zdjecie' },
-        { key: 'location', name: 'Lokalizacja'},
-        { key: 'price', name: 'Cena' },
-        { key: 'rating', name: 'Ocena'},
-        { key: 'created', name: 'Data dodania' }
+        { key: 'available', name: 'Aktywny' },
+        { key: 'spaces', name: 'Miejsca' },
+        { key: 'spaces_left', name: 'Miejsca zajete' },
+        { key: 'created_at', name: 'Data utworzenia'}
     ],
     'pobyt': [
-        { key: 'id', name: 'ID' },
-        { key: 'hotel', name: 'Hotel' },
-        { key: 'checkin', name: 'Zameldowanie' },
-        { key: 'checkout', name: 'Wymeldowanie' },
-        { key: 'guests', name: 'Liczba gości' },
-        { key: 'price_per_night', name: 'Cena za noc' },
-        { key: 'status', name: 'Status' }
+        { key: 'id', name: 'ID'},
+        { key: 'name', name: 'Linia lotnicza' },
+        { key: 'photo', name: 'Zdjecie' },
+        { key: 'available', name: 'Aktywny' },
+        { key: 'spaces', name: 'Miejsca' },
+        { key: 'spaces_left', name: 'Miejsca zajete' },
+        { key: 'created_at', name: 'Data utworzenia'}
     ],
     'powrot': [
         { key: 'id', name: 'ID' },
@@ -269,8 +269,11 @@ function createTableView(records, columns) {
             const column = columns[index];
             const columnName = column ? column.name : `Kolumna ${index + 1}`;
             const displayValue = (cell && cell.display !== undefined && cell.display !== null) ? escapeHTML(cell.display) : 'N/A';
-            if (columns === "Zdjecia") {
-                html += `<td data-label="${escapeHTML(columnName)}">${displayValue}</td>`;
+            console.log(columnName)
+            if (columnName === "Zdjecie") {
+                html += `<td data-label="${escapeHTML(columnName)}">
+                     <img src="data:image/jpeg;base64,${cell.display}" alt="${escapeHTML(columnName)}" width="150" hieght="150"/>
+                    </td>`;
             } else {
                 html += `<td data-label="${escapeHTML(columnName)}">${displayValue}</td>`;
             }
