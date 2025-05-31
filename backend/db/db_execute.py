@@ -1,5 +1,6 @@
 from db.db_controler import PostgresConnector
 from insert_data_into_table import insert_photos_to_db
+import base64
 
 
 def database_connection(func):
@@ -30,7 +31,11 @@ def insert_data(table_name: str, name: str, spaces: int, photo, db):
 
 @database_connection
 def select_data_if_available(table_name: str, db):
-    return db.fetch_query(f"SELECT * FROM {table_name} where available = true;")
+    data = db.fetch_query(f"SELECT * FROM {table_name} where available = true;")
+    for idx, item in enumerate(data):
+        data[idx] = list(item)
+        data[idx][2] = base64.b64encode(bytes(data[idx][2])).decode('utf-8')
+    return data
 
 
 @database_connection

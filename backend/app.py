@@ -67,7 +67,7 @@ def register():
 @app.route("/login",  methods=["POST"])
 def login():
     data = request.get_json(force=True)
-    email = (data.get("username") or "").lower().strip()
+    email = (data.get("email") or "").lower().strip()
     password = data.get("password") or ""
     check = db_execute.check_user_cred_and_return_id(email, password)
     app.logger.info(check)
@@ -128,7 +128,7 @@ def reservation():
 @app.route("/loty")
 def flight():
     data = db_execute.select_data_if_available(table_name="loty")
-    app.logger.info(data)
+    app.logger.info(data[0][2])
     return {"message": f"{data}"}
 
 
