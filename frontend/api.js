@@ -429,8 +429,19 @@ async function loadDataForPage(pageName) { //
             console.log(`Loading data for generic page: ${pageName}...`);
             const apiDataElement = document.getElementById('api-data');
             try {
-                const response = await api.post(`/${pageName}`, {email: "aaaa@aaa", id: 1});
-                console.log(`${pageName} endpoint response:`, response);
+                const userEmail = localStorage.getItem('user_email');
+		const userId = parseInt(localStorage.getItem('user_id'), 10);
+
+		if (!userEmail || !userId) {
+		  alert('Musisz się zalogować, aby zobaczyć swoje rezerwacje.');
+		  window.location.href = 'login.html';
+		  return;
+		}
+
+		const response = await api.post(`/${pageName}`, {
+		  email: userEmail,
+		  id: userId
+		});
                 if (apiDataElement) {
                     apiDataElement.innerHTML = formatDataForDisplay(response, pageName);
                 }
