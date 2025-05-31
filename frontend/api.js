@@ -105,15 +105,6 @@ const COLUMN_DEFINITIONS = {
         { key: 'spaces', name: 'Miejsca' },
         { key: 'spaces_left', name: 'Miejsca zajete' },
         { key: 'created_at', name: 'Data utworzenia'}
-    ],
-    'powrot': [
-        { key: 'id', name: 'ID' },
-        { key: 'return_flight', name: 'Lot powrotny' },
-        { key: 'date', name: 'Data' },
-        { key: 'status', name: 'Status' },
-        { key: 'gate', name: 'Bramka'},
-        { key: 'delay', name: 'Opóźnienie' },
-        { key: 'notes', name: 'Uwagi' }
     ]
 };
 
@@ -495,7 +486,6 @@ async function loadIndexData() {
                     <li><strong>Loty:</strong> /loty</li>
                     <li><strong>Atrakcje:</strong> /atrakcje</li>
                     <li><strong>Pobyt:</strong> /pobyt</li>
-                    <li><strong>Powrót:</strong> /powrot</li>
                 </ul>
             </div>`;
     }
