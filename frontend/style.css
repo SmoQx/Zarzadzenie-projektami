@@ -1,142 +1,104 @@
-/* Podstawowe style dla całej strony */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f7f7f7;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  line-height: 1.6;
 }
 
 .container {
-  background-color: #fff;
-  padding: 20px 40px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-  margin: 20px;
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  min-height: 100vh;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 header {
-  text-align: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  background-color: #3498db;
+  color: white;
+  padding: 20px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
+
 header h1 {
-  color: #333;
-  margin: 0;
+  margin: 0; 
+}
+
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 15px; 
+  flex-wrap: wrap; 
+  margin: 0; 
+  flex: 1; 
+  overflow-x: auto; 
+  flex-shrink: 1;
+}
+
+
+header nav ul li a {
+  display: block;
+  padding: 0.6rem 1rem; 
+  text-decoration: none;
+  color: white;
+  background-color: #2980b9; 
+  border-radius: 6px; 
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+}
+
+header nav ul li a:hover {
+  background-color: #1c6697; 
+  color: white;
+}
+
+header nav ul li a.active {
+  background-color: #1abc9c; 
+  color: #fff;
+  border-radius: 6px; 
+}
+
+main section {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f2f9fc;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
 }
 
 main section h2 {
-  text-align: center;
-  color: #555;
-  margin-bottom: 25px;
-}
-
-/* Style dla formularzy */
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #444;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"] {
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box; 
-  width: 100%;
-  font-size: 16px;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus {
-  border-color: #007bff;
-  outline: none; 
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-}
-
-button[type="submit"] {
-  background-color: #007bff;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-button[type="submit"]:hover {
-  background-color: #0056b3;
-}
-
-.register-prompt {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.register-prompt p {
-  margin: 0;
-  color: #666;
-}
-
-.register-prompt a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.register-prompt a:hover {
-  text-decoration: underline;
-}
-
-.form-group {
-  margin-bottom: 15px;
+  margin-top: 0;
+  color: #2c3e50;
 }
 
 footer {
   text-align: center;
-  margin-top: 30px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
-  font-size: 0.9em;
+  margin-top: 40px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
   color: #777;
 }
 
-@media (max-width: 600px) {
-  .container {
-    margin: 10px;
-    padding: 15px 25px;
-  }
+.logout-btn {
+  padding: 0.5rem 1rem;
+  background-color: #d9534f; 
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 0 0 auto; 
+  margin-left: 1rem; 
+}
 
-  header h1 {
-    font-size: 1.8em;
-  }
-
-  main section h2 {
-    font-size: 1.5em;
-  }
-
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  button[type="submit"] {
-    font-size: 15px;
-  }
+.logout-btn:hover {
+  background-color: #c9302c; 
 }
