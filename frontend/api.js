@@ -269,7 +269,11 @@ function createTableView(records, columns) {
             const column = columns[index];
             const columnName = column ? column.name : `Kolumna ${index + 1}`;
             const displayValue = (cell && cell.display !== undefined && cell.display !== null) ? escapeHTML(cell.display) : 'N/A';
-            html += `<td data-label="${escapeHTML(columnName)}">${displayValue}</td>`;
+            if (columns === "Zdjecia") {
+                html += `<td data-label="${escapeHTML(columnName)}">${displayValue}</td>`;
+            } else {
+                html += `<td data-label="${escapeHTML(columnName)}">${displayValue}</td>`;
+            }
         });
         html += '</tr>';
     });
