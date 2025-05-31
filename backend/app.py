@@ -128,7 +128,6 @@ def reservation():
 @app.route("/loty")
 def flight():
     data = db_execute.select_data_if_available(table_name="loty")
-    app.logger.info(data[0][2])
     return {"message": f"{data}"}
 
 

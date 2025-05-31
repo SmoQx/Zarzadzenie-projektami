@@ -31,11 +31,23 @@ def insert_data(table_name: str, name: str, spaces: int, photo, db):
 
 @database_connection
 def select_data_if_available(table_name: str, db):
+    columns = db.fetch_query(f"""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = %s
+            ORDER BY ordinal_position
+        """, (table_name,))
+
+    columns = [row[0] for row in columns]
+
     data = db.fetch_query(f"SELECT * FROM {table_name} where available = true;")
     for idx, item in enumerate(data):
         data[idx] = list(item)
         data[idx][2] = base64.b64encode(bytes(data[idx][2])).decode('utf-8')
-    return data
+    
+    result = [dict(zip(columns, row)) for row in data]
+
+    return result
 
 
 @database_connection
@@ -108,8 +120,11 @@ LEFT JOIN pobyt p ON r.pobyt_id = p.id
 LEFT JOIN atrakcje a ON r.atrakcje_id = a.id
 LEFT JOIN loty l ON r.loty_id = l.id
 where r.user_id = {user_id};""")
-    print(data)
-    return data
+    columns = ["nazwa", "zdjecia"]
+
+    result = [dict(zip(columns, row)) for row in data]
+    
+    return result
 
 
 def init_db():
