@@ -76,6 +76,7 @@ const api = new ApiClient();
 // Definicje kolumn dla różnych endpointów
 const COLUMN_DEFINITIONS = {
     'loty': [
+        { key: 'id', name: 'ID'},
         { key: 'name', name: 'Linia lotnicza' },
         { key: 'photo', name: 'Zdjecie' },
         { key: 'available', name: 'Aktywny' },
@@ -88,6 +89,7 @@ const COLUMN_DEFINITIONS = {
         { key: 'zdjecia', name: 'Zdjecie' },
     ],
     'atrakcje': [
+        { key: 'id', name: 'ID'},
         { key: 'name', name: 'Linia lotnicza' },
         { key: 'photo', name: 'Zdjecie' },
         { key: 'available', name: 'Aktywny' },
@@ -96,6 +98,7 @@ const COLUMN_DEFINITIONS = {
         { key: 'created_at', name: 'Data utworzenia'}
     ],
     'pobyt': [
+        { key: 'id', name: 'ID'},
         { key: 'name', name: 'Linia lotnicza' },
         { key: 'photo', name: 'Zdjecie' },
         { key: 'available', name: 'Aktywny' },
